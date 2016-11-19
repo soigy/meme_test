@@ -10,7 +10,13 @@ import UIKit
 
 class ViewController: UIViewController, MEMELibDelegate {
     
+    let color:UIColor = UIColor(red:0.0,green:0.5,blue:1.0,alpha:1.0)
+    
     var blinkCount = 0
+    var eyeMove = ""
+    
+    var timeLeft = 60
+    var gemeTimer: Timer!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,17 +49,49 @@ class ViewController: UIViewController, MEMELibDelegate {
         if data.blinkSpeed != 0 {
             setBlinkCount()
         }
+        setEyeMove(data: data)
     }
     
     func setBlinkCount() {
         blinkCount += 1
         textField.text = String(blinkCount)
+        blinkCounterLabel.text = String(blinkCount)
+    }
+    
+    func setEyeMove(data: MEMERealTimeData!) {
+        if data.eyeMoveUp > 0 {
+            eyeMoveText.text = "上: " + String(data.eyeMoveUp)
+        }
+        if data.eyeMoveDown > 0 {
+            eyeMoveText.text = "下: " + String(data.eyeMoveDown)
+        }
+    }
+    
+    func countDown(tm: Timer) {
+        timeLeft -= 1
+        setTimeLabel()
+        if timeLeft == 0 {
+            gemeTimer.invalidate()
+        }
+    }
+    
+    func setTimeLabel() {
+        timeLabel.text = String(timeLeft)
     }
 
     @IBAction func buttonTapHandler(_ sender: Any) {
-        print(MEMELib.sharedInstance().startScanningPeripherals())
-        textField.text = "tapped!";
+        setTimeLabel()
+        gemeTimer = Timer.scheduledTimer(
+            timeInterval: 1.0,
+            target: self,
+            selector: #selector(self.countDown),
+            userInfo: nil,
+            repeats: true
+        )
     }
     @IBOutlet weak var textField: UITextField!
+    @IBOutlet weak var eyeMoveText: UITextField!
+    @IBOutlet weak var blinkCounterLabel: UILabel!
+    @IBOutlet weak var timeLabel: UILabel!
 }
 
